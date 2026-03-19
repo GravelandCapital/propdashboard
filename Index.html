@@ -129,19 +129,18 @@
         window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
         window.createAccount = function() {
-            const target = parseFloat(document.getElementById('mTarget').value) || 0;
-            const consPerc = parseFloat(document.getElementById('mCons').value) || 0;
             const newAcc = {
                 id: Date.now(),
                 name: document.getElementById('mName').value || "Unnamed",
                 stage: 1,
-                target: target,
-                consistency: consPerc,
+                target: parseFloat(document.getElementById('mTarget').value) || 0,
+                consistency: parseFloat(document.getElementById('mCons').value) || 0,
                 minDaysNeeded: parseInt(document.getElementById('mMinDays').value) || 0,
                 minProfitPerDay: parseFloat(document.getElementById('mMinProfit').value) || 0,
-                history: [], currentProfit: 0, daysTraded: 0, bestDay: 0, lastUpdated: 'Never'
+                history: [], currentProfit: 0, daysTraded: 0, bestDay: 0
             };
             window.accounts.push(newAcc);
+            render(); // Immediate Update
             window.save();
             window.closeModal('setupModal');
         };
@@ -150,8 +149,10 @@
             const amount = parseFloat(prompt("Enter profit/loss for today:"));
             if (isNaN(amount)) return;
             const acc = window.accounts.find(a => a.id === id);
+            if(!acc.history) acc.history = [];
             acc.history.push({ id: Date.now(), amount, date: new Date().toISOString() });
             recalculate(acc);
+            render(); // Immediate Update
             window.save();
         };
 
@@ -160,14 +161,17 @@
             const dateVal = document.getElementById('manualDate').value;
             if (isNaN(amount) || !dateVal) return alert("Please fill in both fields");
             const acc = window.accounts.find(a => a.id === window.activeId);
+            if(!acc.history) acc.history = [];
             acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
             recalculate(acc);
-            window.save();
             window.showDetails(window.activeId);
+            render(); // Immediate Update
+            window.save();
             document.getElementById('manualProfit').value = '';
         };
 
         function recalculate(acc) {
+            if(!acc.history) acc.history = [];
             acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
             acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
             acc.bestDay = acc.history.length > 0 ? Math.max(0, ...acc.history.map(e => e.amount)) : 0;
@@ -182,7 +186,8 @@
             const list = document.getElementById('historyList');
             document.getElementById('detailsTitle').innerText = `${acc.name} - Audit`;
             list.innerHTML = '';
-            [...acc.history].reverse().forEach(entry => {
+            const history = acc.history || [];
+            [...history].reverse().forEach(entry => {
                 const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
                 list.innerHTML += `
                     <div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50">
@@ -203,14 +208,23 @@
             const acc = window.accounts.find(a => a.id === accId);
             const entry = acc.history.find(e => e.id === entryId);
             const newVal = parseFloat(prompt("Edit amount:", entry.amount));
-            if (!isNaN(newVal)) { entry.amount = newVal; recalculate(acc); window.save(); window.showDetails(accId); }
+            if (!isNaN(newVal)) { 
+                entry.amount = newVal; 
+                recalculate(acc); 
+                window.showDetails(accId); 
+                render();
+                window.save(); 
+            }
         };
 
         window.deleteEntry = function(accId, entryId) {
             if (confirm("Delete entry?")) {
                 const acc = window.accounts.find(a => a.id === accId);
                 acc.history = acc.history.filter(e => e.id !== entryId);
-                recalculate(acc); window.save(); window.showDetails(accId);
+                recalculate(acc); 
+                window.showDetails(accId); 
+                render();
+                window.save(); 
             }
         };
 
@@ -223,13 +237,23 @@
             acc.stage += 1; acc.history = []; recalculate(acc);
             const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Profit Target?`, acc.target));
             if(!isNaN(nextTarget)) acc.target = nextTarget;
-            window.save(); window.closeModal('payoutModal');
+            render();
+            window.save(); 
+            window.closeModal('payoutModal');
         };
 
-        window.deleteAccount = function(id) { if(confirm("Permanently delete account?")) { window.accounts = window.accounts.filter(a => a.id !== id); window.save(); } };
+        window.deleteAccount = function(id) { 
+            if(confirm("Permanently delete account?")) { 
+                window.accounts = window.accounts.filter(a => a.id !== id); 
+                render();
+                window.save(); 
+            } 
+        };
 
         function render() {
-            const container = document.getElementById('grid'); container.innerHTML = '';
+            const container = document.getElementById('grid'); 
+            if(!container) return;
+            container.innerHTML = '';
             document.getElementById('payoutDisplay').innerText = `$${window.totalPayouts.toLocaleString()}`;
 
             window.accounts.forEach(acc => {
@@ -256,7 +280,7 @@
                                 <span class="text-5xl font-black text-white italic">${Math.floor(progress)}%</span>
                                 <div class="text-right text-xs font-mono font-bold text-slate-500 italic">$${acc.currentProfit.toLocaleString()} / $${acc.target.toLocaleString()}</div>
                             </div>
-                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50 shadow-inner">
+                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50">
                                 <div class="progress-bar ${barClass} h-full rounded-full" style="width: ${progress}%"></div>
                             </div>
                         </div>
