@@ -98,14 +98,15 @@
 
         // CONFIG FROM YOUR SCREENSHOT
         const firebaseConfig = {
-            apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
-            authDomain: "fundeddashboard.firebaseapp.com",
-            projectId: "fundeddashboard",
-            storageBucket: "fundeddashboard.firebasestorage.app",
-            messagingSenderId: "1050670416192",
-            appId: "1:1050670416192:web:3ade461e3b6457dd4cfaa5",
-            measurementId: "G-9EWLLJ7WWY"
-        };
+                apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
+                authDomain: "fundeddashboard.firebaseapp.com",
+                databaseURL: "https://fundeddashboard-default-rtdb.europe-west1.firebasedatabase.app", // ADD THIS LINE
+                projectId: "fundeddashboard",
+                storageBucket: "fundeddashboard.firebasestorage.app",
+                messagingSenderId: "1050670416192",
+                appId: "1:1050670416192:web:3ade461e3b6457dd4cfaa5",
+                measurementId: "G-9EWLLJ7WWY"
+            };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
