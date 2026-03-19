@@ -13,11 +13,7 @@
         .stage-2 { border: 2px solid #a855f7 !important; box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
         .stage-2-bar { background: linear-gradient(90deg, #a855f7, #eab308); }
         @keyframes borderRotate { 100% { filter: hue-rotate(360deg); } }
-        .stage-3 { 
-            border: 2px solid #06b6d4 !important; 
-            box-shadow: 0 0 30px rgba(6, 182, 212, 0.3);
-            animation: borderRotate 6s linear infinite;
-        }
+        .stage-3 { border: 2px solid #06b6d4 !important; box-shadow: 0 0 30px rgba(6, 182, 212, 0.3); animation: borderRotate 6s linear infinite; }
         .stage-3-bar { background: linear-gradient(90deg, #06b6d4, #f43f5e, #fbbf24); background-size: 200% 200%; }
         .payout-glow { text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
     </style>
@@ -28,7 +24,7 @@
         <div class="flex justify-between items-center mb-12 bg-slate-900/40 p-6 rounded-[2rem] border border-slate-800/50">
             <div>
                 <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">Funded Fleet</h1>
-                <p id="cloudStatus" class="text-amber-500 text-[10px] font-bold uppercase tracking-widest mt-1">☁️ Connecting to Cloud...</p>
+                <p id="cloudStatus" class="text-amber-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic">☁️ Connecting...</p>
             </div>
             <div class="text-right">
                 <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Payouts</p>
@@ -36,59 +32,53 @@
             </div>
         </div>
 
-        <button onclick="openModal('setupModal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition-all mb-8 shadow-lg shadow-blue-900/20 active:scale-95">
+        <button onclick="window.openModal('setupModal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition-all mb-8 shadow-lg active:scale-95">
             + NEW ACCOUNT
         </button>
 
         <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
     </div>
 
+    <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full">
+            <h2 class="text-xl font-bold mb-6 text-white text-center">New Account</h2>
+            <div class="space-y-4">
+                <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="mTarget" placeholder="Target $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                    <input type="number" id="mCons" placeholder="Consistency %" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <input type="number" id="mMinDays" placeholder="Min Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                    <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                </div>
+                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4">Create Account</button>
+                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-sm mt-2">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="detailsModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-50 backdrop-blur-md">
         <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-2xl w-full max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-6">
-                <h2 id="detailsTitle" class="text-2xl font-black text-white italic">History</h2>
-                <button onclick="closeModal('detailsModal')" class="text-slate-500 hover:text-white text-2xl">✕</button>
+                <h2 id="detailsTitle" class="text-2xl font-black text-white italic tracking-tighter">Audit Log</h2>
+                <button onclick="window.closeModal('detailsModal')" class="text-slate-500 hover:text-white text-2xl">✕</button>
             </div>
-            <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex flex-wrap md:flex-nowrap gap-3 items-end">
-                <div class="flex-1 min-w-[140px]">
-                    <label class="text-[9px] font-bold text-slate-500 uppercase ml-1">Profit/Loss</label>
-                    <input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg border border-slate-700 outline-none text-white">
-                </div>
-                <div class="flex-1 min-w-[140px]">
-                    <label class="text-[9px] font-bold text-slate-500 uppercase ml-1">Date</label>
-                    <input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg border border-slate-700 outline-none text-sm text-white">
-                </div>
-                <button onclick="addManualDay()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 px-6 rounded-lg text-sm transition">Add Day</button>
+            <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex gap-3 items-end">
+                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label><input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700"></div>
+                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label><input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 text-sm"></div>
+                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px]">Add</button>
             </div>
-            <div id="historyList" class="flex-1 overflow-y-auto space-y-3 pr-2 border-t border-slate-800 pt-4"></div>
+            <div id="historyList" class="flex-1 overflow-y-auto space-y-3"></div>
         </div>
     </div>
 
     <div id="payoutModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full text-center shadow-2xl">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full text-center">
             <div class="text-5xl mb-4">💰</div>
-            <h2 class="text-2xl font-bold mb-2 text-white italic">Claim Payout</h2>
-            <input type="number" id="payoutInput" placeholder="Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 outline-none w-full text-white text-center text-2xl mb-4">
-            <button onclick="processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition">Confirm & Upgrade</button>
-            <button onclick="closeModal('payoutModal')" class="mt-4 text-slate-500 text-xs font-bold uppercase tracking-widest">Cancel</button>
-        </div>
-    </div>
-
-    <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2rem] max-w-md w-full">
-            <h2 class="text-xl font-bold mb-6 text-white text-center">Deploy New Account</h2>
-            <div class="space-y-4">
-                <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white">
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mTarget" placeholder="Target $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white">
-                    <input type="number" id="mCons" placeholder="Consistency %" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white">
-                </div>
-                <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mMinDays" placeholder="Min Days" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white">
-                    <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white">
-                </div>
-                <button onclick="createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 active:scale-95 transition">Start Stage 1</button>
-            </div>
+            <h2 class="text-2xl font-bold mb-6 text-white italic">Claim Payout</h2>
+            <input type="number" id="payoutInput" placeholder="Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-2xl mb-4">
+            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white">Upgrade Stage</button>
         </div>
     </div>
 
@@ -96,17 +86,16 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // CONFIG FROM YOUR SCREENSHOT
         const firebaseConfig = {
-                apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
-                authDomain: "fundeddashboard.firebaseapp.com",
-                databaseURL: "https://fundeddashboard-default-rtdb.europe-west1.firebasedatabase.app", // ADD THIS LINE
-                projectId: "fundeddashboard",
-                storageBucket: "fundeddashboard.firebasestorage.app",
-                messagingSenderId: "1050670416192",
-                appId: "1:1050670416192:web:3ade461e3b6457dd4cfaa5",
-                measurementId: "G-9EWLLJ7WWY"
-            };
+            apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
+            authDomain: "fundeddashboard.firebaseapp.com",
+            databaseURL: "https://fundeddashboard-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "fundeddashboard",
+            storageBucket: "fundeddashboard.firebasestorage.app",
+            messagingSenderId: "1050670416192",
+            appId: "1:1050670416192:web:3ade461e3b6457dd4cfaa5",
+            measurementId: "G-9EWLLJ7WWY"
+        };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
@@ -115,22 +104,22 @@
         window.totalPayouts = 0;
         window.activeId = null;
 
-        const dataRef = ref(db, 'funded_fleet_data/');
+        const dataRef = ref(db, 'funded_fleet_v9/');
         onValue(dataRef, (snapshot) => {
             const data = snapshot.val();
             if (data) {
                 window.accounts = data.accounts || [];
                 window.totalPayouts = data.totalPayouts || 0;
                 document.getElementById('cloudStatus').innerText = "☁️ Cloud Synced";
-                document.getElementById('cloudStatus').classList.replace('text-amber-500', 'text-emerald-500');
+                document.getElementById('cloudStatus').className = "text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic";
             } else {
-                document.getElementById('cloudStatus').innerText = "☁️ Connected (Ready)";
+                document.getElementById('cloudStatus').innerText = "☁️ Online (Ready)";
             }
             render();
         });
 
         window.save = function() {
-            set(ref(db, 'funded_fleet_data/'), {
+            set(ref(db, 'funded_fleet_v9/'), {
                 accounts: window.accounts,
                 totalPayouts: window.totalPayouts
             });
@@ -154,11 +143,11 @@
             };
             window.accounts.push(newAcc);
             window.save();
-            closeModal('setupModal');
+            window.closeModal('setupModal');
         };
 
         window.logProfit = function(id) {
-            const amount = parseFloat(prompt("Profit/Loss for today:"));
+            const amount = parseFloat(prompt("Enter profit/loss for today:"));
             if (isNaN(amount)) return;
             const acc = window.accounts.find(a => a.id === id);
             acc.history.push({ id: Date.now(), amount, date: new Date().toISOString() });
@@ -169,12 +158,12 @@
         window.addManualDay = function() {
             const amount = parseFloat(document.getElementById('manualProfit').value);
             const dateVal = document.getElementById('manualDate').value;
-            if (isNaN(amount) || !dateVal) return alert("Fill all fields");
+            if (isNaN(amount) || !dateVal) return alert("Please fill in both fields");
             const acc = window.accounts.find(a => a.id === window.activeId);
             acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
             recalculate(acc);
             window.save();
-            showDetails(window.activeId);
+            window.showDetails(window.activeId);
             document.getElementById('manualProfit').value = '';
         };
 
@@ -185,53 +174,47 @@
             const uniqueDays = new Set();
             acc.history.forEach(e => { if (e.amount >= acc.minProfitPerDay) uniqueDays.add(new Date(e.date).toDateString()); });
             acc.daysTraded = uniqueDays.size;
-            if (acc.history.length > 0) {
-                const last = new Date(acc.history[acc.history.length-1].date);
-                acc.lastUpdated = last.toLocaleString([], {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit'});
-            }
         }
 
         window.showDetails = function(id) {
             window.activeId = id;
             const acc = window.accounts.find(a => a.id === id);
             const list = document.getElementById('historyList');
-            document.getElementById('detailsTitle').innerText = `${acc.name} Audit`;
+            document.getElementById('detailsTitle').innerText = `${acc.name} - Audit`;
             list.innerHTML = '';
             [...acc.history].reverse().forEach(entry => {
-                const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric', year:'numeric'});
+                const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
                 list.innerHTML += `
-                    <div class="bg-slate-800/40 p-4 rounded-2xl flex justify-between items-center border border-slate-800">
+                    <div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50">
                         <div>
-                            <p class="text-[9px] uppercase font-bold text-slate-500">${date}</p>
-                            <p class="text-lg font-mono font-bold ${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'}">
-                                ${entry.amount >= 0 ? '+' : ''}$${entry.amount.toLocaleString()}
-                            </p>
+                            <p class="text-[10px] text-slate-500 uppercase font-bold">${date}</p>
+                            <p class="font-mono ${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold">$${entry.amount.toLocaleString()}</p>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="editEntry(${acc.id}, ${entry.id})" class="text-slate-400 hover:text-white text-xs bg-slate-700 px-3 py-1 rounded-lg">Edit</button>
-                            <button onclick="deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 bg-red-900/10 px-3 py-1 rounded-lg text-xs">✕</button>
+                            <button onclick="window.editEntry(${acc.id}, ${entry.id})" class="text-xs bg-slate-700 px-3 py-1 rounded">Edit</button>
+                            <button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-xs text-red-500 bg-red-900/20 px-3 py-1 rounded">✕</button>
                         </div>
                     </div>`;
             });
-            openModal('detailsModal');
+            window.openModal('detailsModal');
         };
 
         window.editEntry = function(accId, entryId) {
             const acc = window.accounts.find(a => a.id === accId);
             const entry = acc.history.find(e => e.id === entryId);
             const newVal = parseFloat(prompt("Edit amount:", entry.amount));
-            if (!isNaN(newVal)) { entry.amount = newVal; recalculate(acc); window.save(); showDetails(accId); }
+            if (!isNaN(newVal)) { entry.amount = newVal; recalculate(acc); window.save(); window.showDetails(accId); }
         };
 
         window.deleteEntry = function(accId, entryId) {
             if (confirm("Delete entry?")) {
                 const acc = window.accounts.find(a => a.id === accId);
                 acc.history = acc.history.filter(e => e.id !== entryId);
-                recalculate(acc); window.save(); showDetails(accId);
+                recalculate(acc); window.save(); window.showDetails(accId);
             }
         };
 
-        window.triggerPayout = function(id) { window.activeId = id; openModal('payoutModal'); };
+        window.triggerPayout = (id) => { window.activeId = id; window.openModal('payoutModal'); };
 
         window.processPayout = function() {
             const amount = parseFloat(document.getElementById('payoutInput').value) || 0;
@@ -240,7 +223,7 @@
             acc.stage += 1; acc.history = []; recalculate(acc);
             const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Profit Target?`, acc.target));
             if(!isNaN(nextTarget)) acc.target = nextTarget;
-            window.save(); closeModal('payoutModal'); document.getElementById('payoutInput').value = '';
+            window.save(); window.closeModal('payoutModal');
         };
 
         window.deleteAccount = function(id) { if(confirm("Permanently delete account?")) { window.accounts = window.accounts.filter(a => a.id !== id); window.save(); } };
@@ -253,9 +236,7 @@
                 const progress = Math.min((acc.currentProfit / acc.target) * 100, 100);
                 const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
                 const violation = acc.consistency > 0 && curCons > acc.consistency;
-                const daysMet = acc.daysTraded >= acc.minDaysNeeded;
-                const consistencyMet = !violation;
-                const canUpgrade = daysMet && consistencyMet;
+                const canUpgrade = (acc.daysTraded >= acc.minDaysNeeded) && !violation;
 
                 let cardClass = ""; let barClass = "bg-blue-600";
                 if(acc.stage === 2) { cardClass = "stage-2"; barClass = "stage-2-bar"; }
@@ -268,14 +249,14 @@
                                 <span class="text-[9px] bg-slate-950 text-slate-400 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-slate-800">Stage ${acc.stage}</span>
                                 <h3 class="text-2xl font-black text-white italic mt-2 tracking-tight">${acc.name}</h3>
                             </div>
-                            <button onclick="deleteAccount(${acc.id})" class="text-slate-800 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">✕</button>
+                            <button onclick="window.deleteAccount(${acc.id})" class="text-slate-800 hover:text-red-500 opacity-0 group-hover:opacity-100 transition">✕</button>
                         </div>
                         <div class="mb-8">
                             <div class="flex justify-between items-end mb-2">
                                 <span class="text-5xl font-black text-white italic">${Math.floor(progress)}%</span>
                                 <div class="text-right text-xs font-mono font-bold text-slate-500 italic">$${acc.currentProfit.toLocaleString()} / $${acc.target.toLocaleString()}</div>
                             </div>
-                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50">
+                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50 shadow-inner">
                                 <div class="progress-bar ${barClass} h-full rounded-full" style="width: ${progress}%"></div>
                             </div>
                         </div>
@@ -286,14 +267,14 @@
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
                                 <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Trading Days</p>
-                                <p class="text-sm font-mono ${daysMet ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded}</p>
+                                <p class="text-sm font-mono ${acc.daysTraded >= acc.minDaysNeeded ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded}</p>
                             </div>
                         </div>
                         <div class="flex gap-3">
-                            <button onclick="logProfit(${acc.id})" class="flex-[2] bg-white text-slate-950 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition shadow-lg active:scale-95">Log Profit</button>
-                            <button onclick="showDetails(${acc.id})" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold text-xs uppercase text-slate-400 hover:bg-slate-700 transition active:scale-95">Audit</button>
+                            <button onclick="window.logProfit(${acc.id})" class="flex-[2] bg-white text-slate-950 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition shadow-lg active:scale-95">Update</button>
+                            <button onclick="window.showDetails(${acc.id})" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold text-xs uppercase text-slate-400 hover:bg-slate-700 transition active:scale-95">Audit</button>
                         </div>
-                        ${canUpgrade ? `<button onclick="triggerPayout(${acc.id})" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-6 py-2 rounded-full animate-bounce shadow-xl whitespace-nowrap uppercase">Payout & Upgrade Ready</button>` : ''}
+                        ${canUpgrade ? `<button onclick="window.triggerPayout(${acc.id})" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-6 py-2 rounded-full animate-bounce shadow-xl shadow-emerald-500/20 whitespace-nowrap uppercase">Payout & Upgrade Ready</button>` : ''}
                     </div>`;
             });
         }
