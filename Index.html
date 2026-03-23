@@ -260,7 +260,7 @@
                 const progress = Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100);
                 const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
                 const violation = acc.consistency > 0 && curCons > acc.consistency;
-                const canUpgrade = (acc.currentProfit >= acc.target) && (acc.daysTraded >= acc.minDaysNeeded) && !violation;
+                const canUpgrade = (acc.daysTraded >= acc.minDaysNeeded) && !violation;
 
                 let cardClass = isLoss ? "card-drawdown" : ""; 
                 let barClass = isLoss ? "bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-blue-600";
