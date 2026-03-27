@@ -43,32 +43,28 @@
         <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"></div>
 
         <div class="mt-20 border-t border-slate-800 pt-12">
-            <div class="flex justify-between items-end mb-8">
-                <div>
-                    <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter">Payout Calendar</h2>
-                    <p class="text-[10px] text-slate-500 font-bold uppercase italic">Monthly distribution & Income Log</p>
-                </div>
-            </div>
-            <div id="payoutCalendar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                </div>
+            <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter mb-8">Payout Calendar</h2>
+            <div id="payoutCalendar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
         </div>
     </div>
 
     <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full">
-            <h2 class="text-xl font-bold mb-6 text-white text-center">New Account</h2>
+        <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
+            <h2 class="text-xl font-bold mb-6 text-white text-center">New Account Deployment</h2>
             <div class="space-y-4">
-                <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mTarget" placeholder="Target $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
-                    <input type="number" id="mCons" placeholder="Consistency %" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                    <input type="number" id="mTarget" placeholder="Profit Target $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    <input type="number" id="mCons" placeholder="Consistency %" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mMinDays" placeholder="Min Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
-                    <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700">
+                    <input type="number" id="mMinDays" placeholder="Min Trading Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 </div>
-                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4">Create Account</button>
-                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-sm mt-2">Cancel</button>
+                <input type="number" id="mMinBalance" placeholder="Min Balance for Payout $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                
+                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 shadow-lg active:scale-95 transition">Deploy Account</button>
+                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-xs font-bold uppercase mt-2">Cancel</button>
             </div>
         </div>
     </div>
@@ -80,9 +76,15 @@
                 <button onclick="window.closeModal('detailsModal')" class="text-slate-500 hover:text-white text-2xl">✕</button>
             </div>
             <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex gap-3 items-end">
-                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label><input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700"></div>
-                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label><input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 text-sm"></div>
-                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px]">Add</button>
+                <div class="flex-1">
+                    <label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label>
+                    <input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none">
+                </div>
+                <div class="flex-1">
+                    <label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label>
+                    <input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none text-sm">
+                </div>
+                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px] active:scale-95 transition">Add</button>
             </div>
             <div id="historyList" class="flex-1 overflow-y-auto space-y-3"></div>
         </div>
@@ -92,8 +94,8 @@
         <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full text-center">
             <div class="text-5xl mb-4">💰</div>
             <h2 class="text-2xl font-bold mb-6 text-white italic">Claim Payout</h2>
-            <input type="number" id="payoutInput" placeholder="Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-2xl mb-4">
-            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white">Confirm Payout</button>
+            <input type="number" id="payoutInput" placeholder="Withdrawal Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-2xl mb-4 outline-none">
+            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition">Confirm & Upgrade</button>
         </div>
     </div>
 
@@ -152,6 +154,7 @@
                 consistency: parseFloat(document.getElementById('mCons').value) || 0,
                 minDaysNeeded: parseInt(document.getElementById('mMinDays').value) || 0,
                 minProfitPerDay: parseFloat(document.getElementById('mMinProfit').value) || 0,
+                minBalance: parseFloat(document.getElementById('mMinBalance').value) || 0,
                 history: [], currentProfit: 0, daysTraded: 0, bestDay: 0
             };
             window.accounts.push(newAcc);
@@ -202,16 +205,15 @@
             const list = document.getElementById('historyList');
             document.getElementById('detailsTitle').innerText = `${acc.name} Audit`;
             list.innerHTML = '';
-            const history = acc.history || [];
-            [...history].reverse().forEach(entry => {
+            [...(acc.history || [])].reverse().forEach(entry => {
                 const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
-                list.innerHTML += `<div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50"><div><p class="text-[10px] text-slate-500 font-bold">${date}</p><p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p></div><button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 text-xs">✕</button></div>`;
+                list.innerHTML += `<div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50"><div><p class="text-[10px] text-slate-500 font-bold uppercase">${date}</p><p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p></div><button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 text-xs px-3">✕</button></div>`;
             });
             window.openModal('detailsModal');
         };
 
         window.deleteEntry = function(accId, entryId) {
-            if (confirm("Delete?")) {
+            if (confirm("Delete entry?")) {
                 const acc = window.accounts.find(a => a.id === accId);
                 acc.history = acc.history.filter(e => e.id !== entryId);
                 recalculate(acc); window.showDetails(accId); render(); window.save();
@@ -223,44 +225,39 @@
         window.processPayout = function() {
             const amount = parseFloat(document.getElementById('payoutInput').value) || 0;
             const acc = window.accounts.find(a => a.id === window.activeId);
-            
-            // Log to History
-            window.payoutHistory.push({
-                id: Date.now(),
-                amount: amount,
-                date: new Date().toISOString(),
-                accountName: acc.name
-            });
-
+            window.payoutHistory.push({ id: Date.now(), amount, date: new Date().toISOString(), accountName: acc.name });
             acc.stage += 1; 
             acc.history = []; 
             recalculate(acc);
-            
             const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Target?`, acc.target));
             if(!isNaN(nextTarget)) acc.target = nextTarget;
-            
-            render();
-            window.save(); 
-            window.closeModal('payoutModal');
+            render(); window.save(); window.closeModal('payoutModal');
             document.getElementById('payoutInput').value = '';
         };
 
-        window.deleteAccount = function(id) { if(confirm("Delete Account?")) { window.accounts = window.accounts.filter(a => a.id !== id); render(); window.save(); } };
+        window.deleteAccount = function(id) { if(confirm("Permanently delete account?")) { window.accounts = window.accounts.filter(a => a.id !== id); render(); window.save(); } };
 
         function render() {
-            // Header Total
             const totalSum = window.payoutHistory.reduce((sum, p) => sum + p.amount, 0);
             document.getElementById('payoutDisplay').innerText = `$${totalSum.toLocaleString()}`;
 
-            // Account Grid
             const container = document.getElementById('grid');
             container.innerHTML = '';
             window.accounts.forEach(acc => {
                 const isLoss = acc.currentProfit < 0;
-                const progress = Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100);
+                const progress = acc.target > 0 ? Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100) : 0;
                 const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
+                
+                // Consistency Violation check (if rule is set)
                 const violation = acc.consistency > 0 && curCons > acc.consistency;
-                const canUpgrade = (acc.daysTraded >= acc.minDaysNeeded) && !violation;
+                
+                // Payout Ready logic: 
+                // Checks Days (if set), Consistency (if set), and Min Balance (if set)
+                const daysMet = acc.minDaysNeeded === 0 || acc.daysTraded >= acc.minDaysNeeded;
+                const balanceMet = acc.minBalance === 0 || acc.currentProfit >= acc.minBalance;
+                const consistencyMet = acc.consistency === 0 || !violation;
+                
+                const canUpgrade = daysMet && balanceMet && consistencyMet;
 
                 let cardClass = isLoss ? "card-drawdown" : ""; 
                 let barClass = isLoss ? "bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-blue-600";
@@ -276,26 +273,34 @@
                             <button onclick="window.deleteAccount(${acc.id})" class="text-slate-800 hover:text-red-500">✕</button>
                         </div>
                         <div class="mb-8">
-                            <div class="flex justify-between items-end mb-2"><span class="text-5xl font-black ${isLoss ? 'text-red-500' : 'text-white'} italic">$${acc.currentProfit.toLocaleString()}</span><div class="text-right text-xs font-mono font-bold text-slate-500 italic">$${acc.currentProfit.toLocaleString()} / $${acc.target.toLocaleString()}</div></div>
-                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50"><div class="progress-bar ${barClass} h-full rounded-full" style="width: ${progress}%"></div></div>
+                            <div class="flex justify-between items-end mb-2">
+                                <span class="text-5xl font-black ${isLoss ? 'text-red-500' : 'text-white'} italic">$${acc.currentProfit.toLocaleString()}</span>
+                                <div class="text-right text-[10px] font-mono font-bold text-slate-500 italic">Target: $${acc.target.toLocaleString()}</div>
+                            </div>
+                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50 shadow-inner">
+                                <div class="progress-bar ${barClass} h-full rounded-full" style="width: ${progress}%"></div>
+                            </div>
                         </div>
                         <div class="grid grid-cols-2 gap-3 mb-8">
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50"><p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Consistency</p><p class="text-sm font-mono ${violation ? 'text-red-500' : 'text-blue-400'} font-bold">${Math.floor(curCons)}% / ${acc.consistency}%</p></div>
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50"><p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Trading Days</p><p class="text-sm font-mono ${acc.daysTraded >= acc.minDaysNeeded ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded}</p></div>
+                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Best Day</p>
+                                <p class="text-sm font-mono ${violation ? 'text-red-500' : 'text-blue-400'} font-bold">$${acc.bestDay.toLocaleString()}</p>
+                            </div>
+                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
+                                <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Trading Days</p>
+                                <p class="text-sm font-mono ${daysMet ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded}</p>
+                            </div>
                         </div>
                         <div class="flex gap-3">
                             <button onclick="window.logProfit(${acc.id})" class="flex-[2] bg-white text-slate-950 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition shadow-lg active:scale-95">Update</button>
                             <button onclick="window.showDetails(${acc.id})" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold text-xs uppercase text-slate-400 hover:bg-slate-700 transition active:scale-95">Audit</button>
                         </div>
-                        ${canUpgrade ? `<button onclick="window.triggerPayout(${acc.id})" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-6 py-2 rounded-full animate-bounce shadow-xl uppercase">Payout Ready</button>` : ''}
+                        ${canUpgrade ? `<button onclick="window.triggerPayout(${acc.id})" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-6 py-2 rounded-full animate-bounce shadow-xl uppercase whitespace-nowrap">Payout Ready</button>` : ''}
                     </div>`;
             });
 
-            // Monthly Calendar Render
             const cal = document.getElementById('payoutCalendar');
             cal.innerHTML = '';
-            
-            // Group by Month
             const groups = {};
             window.payoutHistory.forEach(p => {
                 const date = new Date(p.date);
@@ -304,7 +309,6 @@
                 groups[key].total += p.amount;
                 groups[key].items.push(p);
             });
-
             Object.keys(groups).sort((a,b) => new Date(b) - new Date(a)).forEach(month => {
                 cal.innerHTML += `
                     <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] relative overflow-hidden">
