@@ -50,7 +50,7 @@
 
     <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
-            <h2 class="text-xl font-bold mb-6 text-white text-center">New Account Deployment</h2>
+            <h2 class="text-xl font-bold mb-6 text-white text-center">New Account</h2>
             <div class="space-y-4">
                 <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <div class="grid grid-cols-2 gap-4">
@@ -61,10 +61,9 @@
                     <input type="number" id="mMinDays" placeholder="Min Trading Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                     <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 </div>
-                <input type="number" id="mMinBalance" placeholder="Min Balance for Payout $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
-                
-                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 shadow-lg active:scale-95 transition">Deploy Account</button>
-                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-xs font-bold uppercase mt-2">Cancel</button>
+                <input type="number" id="mMinBalance" placeholder="Min Balance for Payout (Optional) $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 active:scale-95 transition">Deploy</button>
+                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-xs mt-2 font-bold uppercase">Cancel</button>
             </div>
         </div>
     </div>
@@ -76,15 +75,9 @@
                 <button onclick="window.closeModal('detailsModal')" class="text-slate-500 hover:text-white text-2xl">✕</button>
             </div>
             <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex gap-3 items-end">
-                <div class="flex-1">
-                    <label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label>
-                    <input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none">
-                </div>
-                <div class="flex-1">
-                    <label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label>
-                    <input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none text-sm">
-                </div>
-                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px] active:scale-95 transition">Add</button>
+                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label><input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none"></div>
+                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label><input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none text-sm"></div>
+                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px]">Add</button>
             </div>
             <div id="historyList" class="flex-1 overflow-y-auto space-y-3"></div>
         </div>
@@ -158,9 +151,7 @@
                 history: [], currentProfit: 0, daysTraded: 0, bestDay: 0
             };
             window.accounts.push(newAcc);
-            render();
-            window.save();
-            window.closeModal('setupModal');
+            render(); window.save(); window.closeModal('setupModal');
         };
 
         window.logProfit = function(id) {
@@ -169,9 +160,7 @@
             const acc = window.accounts.find(a => a.id === id);
             if(!acc.history) acc.history = [];
             acc.history.push({ id: Date.now(), amount, date: new Date().toISOString() });
-            recalculate(acc);
-            render();
-            window.save();
+            recalculate(acc); render(); window.save();
         };
 
         window.addManualDay = function() {
@@ -181,10 +170,7 @@
             const acc = window.accounts.find(a => a.id === window.activeId);
             if(!acc.history) acc.history = [];
             acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
-            recalculate(acc);
-            window.showDetails(window.activeId);
-            render();
-            window.save();
+            recalculate(acc); window.showDetails(window.activeId); render(); window.save();
             document.getElementById('manualProfit').value = '';
         };
 
@@ -213,7 +199,7 @@
         };
 
         window.deleteEntry = function(accId, entryId) {
-            if (confirm("Delete entry?")) {
+            if (confirm("Delete?")) {
                 const acc = window.accounts.find(a => a.id === accId);
                 acc.history = acc.history.filter(e => e.id !== entryId);
                 recalculate(acc); window.showDetails(accId); render(); window.save();
@@ -226,16 +212,14 @@
             const amount = parseFloat(document.getElementById('payoutInput').value) || 0;
             const acc = window.accounts.find(a => a.id === window.activeId);
             window.payoutHistory.push({ id: Date.now(), amount, date: new Date().toISOString(), accountName: acc.name });
-            acc.stage += 1; 
-            acc.history = []; 
-            recalculate(acc);
+            acc.stage += 1; acc.history = []; recalculate(acc);
             const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Target?`, acc.target));
             if(!isNaN(nextTarget)) acc.target = nextTarget;
             render(); window.save(); window.closeModal('payoutModal');
             document.getElementById('payoutInput').value = '';
         };
 
-        window.deleteAccount = function(id) { if(confirm("Permanently delete account?")) { window.accounts = window.accounts.filter(a => a.id !== id); render(); window.save(); } };
+        window.deleteAccount = function(id) { if(confirm("Delete Account?")) { window.accounts = window.accounts.filter(a => a.id !== id); render(); window.save(); } };
 
         function render() {
             const totalSum = window.payoutHistory.reduce((sum, p) => sum + p.amount, 0);
@@ -247,15 +231,13 @@
                 const isLoss = acc.currentProfit < 0;
                 const progress = acc.target > 0 ? Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100) : 0;
                 const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
-                
-                // Consistency Violation check (if rule is set)
                 const violation = acc.consistency > 0 && curCons > acc.consistency;
                 
-                // Payout Ready logic: 
-                // Checks Days (if set), Consistency (if set), and Min Balance (if set)
-                const daysMet = acc.minDaysNeeded === 0 || acc.daysTraded >= acc.minDaysNeeded;
-                const balanceMet = acc.minBalance === 0 || acc.currentProfit >= acc.minBalance;
-                const consistencyMet = acc.consistency === 0 || !violation;
+                // CORRECTED OPTIONAL LOGIC:
+                // If the field is missing (old account) or 0, it's ignored (returns true).
+                const daysMet = !acc.minDaysNeeded || acc.daysTraded >= acc.minDaysNeeded;
+                const balanceMet = !acc.minBalance || acc.currentProfit >= acc.minBalance;
+                const consistencyMet = !acc.consistency || !violation;
                 
                 const canUpgrade = daysMet && balanceMet && consistencyMet;
 
@@ -288,7 +270,7 @@
                             </div>
                             <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
                                 <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Trading Days</p>
-                                <p class="text-sm font-mono ${daysMet ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded}</p>
+                                <p class="text-sm font-mono ${daysMet ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded || 0}</p>
                             </div>
                         </div>
                         <div class="flex gap-3">
