@@ -9,7 +9,6 @@ export function renderFleet() {
         const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
         const violation = acc.consistency > 0 && curCons > acc.consistency;
 
-        // Requirement logic (Handles the "Optional/0" rule)
         const daysMet = !acc.minDaysNeeded || acc.daysTraded >= acc.minDaysNeeded;
         const balanceMet = !acc.minBalance || acc.currentProfit >= acc.minBalance;
         const consistencyMet = !acc.consistency || !violation;
@@ -54,7 +53,8 @@ export function renderFleet() {
     });
 }
 
-// Logic functions attached to window for HTML buttons
+// --- ATTACHED FUNCTIONS ---
+
 window.createAccount = function() {
     const newAcc = {
         id: Date.now(),
@@ -82,16 +82,46 @@ window.logProfit = function(id) {
     window.saveAll();
 };
 
-function recalculate(acc) {
+window.showDetails = function(id) {
+    window.activeId = id;
+    const acc = window.accounts.find(a => a.id === id);
+    const list = document.getElementById('historyList');
+    document.getElementById('detailsTitle').innerText = `${acc.name} Audit`;
+    list.innerHTML = '';
+    const history = acc.history || [];
+    [...history].reverse().forEach(entry => {
+        const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+        list.innerHTML += `
+            <div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50">
+                <div><p class="text-[10px] text-slate-500 font-bold uppercase">${date}</p><p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p></div>
+                <button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 text-xs px-3">✕</button>
+            </div>`;
+    });
+    window.openModal('detailsModal');
+};
+
+window.addManualDay = function() {
+    const amount = parseFloat(document.getElementById('manualProfit').value);
+    const dateVal = document.getElementById('manualDate').value;
+    if (isNaN(amount) || !dateVal) return alert("Fill fields");
+    const acc = window.accounts.find(a => a.id === window.activeId);
     if(!acc.history) acc.history = [];
-    acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-    acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
-    const profitDays = acc.history.filter(h => h.amount > 0).map(h => h.amount);
-    acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
-    const uniqueDays = new Set();
-    acc.history.forEach(e => { if (e.amount >= acc.minProfitPerDay) uniqueDays.add(new Date(e.date).toDateString()); });
-    acc.daysTraded = uniqueDays.size;
-}
+    acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
+    recalculate(acc);
+    window.showDetails(window.activeId);
+    window.saveAll();
+    document.getElementById('manualProfit').value = '';
+};
+
+window.deleteEntry = function(accId, entryId) {
+    if (confirm("Delete entry?")) {
+        const acc = window.accounts.find(a => a.id === accId);
+        acc.history = acc.history.filter(e => e.id !== entryId);
+        recalculate(acc);
+        window.showDetails(accId);
+        window.saveAll();
+    }
+};
 
 window.deleteAccount = function(id) {
     if(confirm("Delete Account?")) {
@@ -99,3 +129,14 @@ window.deleteAccount = function(id) {
         window.saveAll();
     }
 };
+
+function recalculate(acc) {
+    if(!acc.history) acc.history = [];
+    acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+    acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
+    const profitDays = acc.history.filter(h => h.amount > 0).map(h => h.amount);
+    acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
+    const uniqueDays = new Set();
+    acc.history.forEach(e => { if (e.amount >= (acc.minProfitPerDay || 0)) uniqueDays.add(new Date(e.date).toDateString()); });
+    acc.daysTraded = uniqueDays.size;
+}

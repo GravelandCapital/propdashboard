@@ -1,7 +1,7 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Import the render functions from your other files
+// Import renderers
 import { renderFleet } from './dashboard.js';
 import { renderPayouts } from './payouts.js';
 import { renderSubs } from './subscriptions.js';
@@ -23,20 +23,42 @@ const db = getDatabase(app);
 window.accounts = [];
 window.payoutHistory = [];
 window.subscriptions = [];
+window.activeId = null;
 
-// Navigation Logic
-window.showSection = (sectionId) => {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-    document.getElementById(`${sectionId}-section`).classList.remove('hidden');
-    
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    // Handle the event if triggered by a click
-    if (window.event) {
-        window.event.currentTarget.classList.add('active');
-    }
+// GLOBAL HELPERS
+window.openModal = (id) => {
+    const modal = document.getElementById(id);
+    if(modal) modal.classList.remove('hidden');
 };
 
-// Sync with Firebase
+window.closeModal = (id) => {
+    const modal = document.getElementById(id);
+    if(modal) modal.classList.add('hidden');
+};
+
+window.showSection = (sectionId) => {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+    const section = document.getElementById(`${sectionId}-section`);
+    if(section) section.classList.remove('hidden');
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (window.event) window.event.currentTarget.classList.add('active');
+};
+
+// FIREBASE PUSH
+window.saveAll = function() {
+    set(ref(db, 'funded_fleet_v10/'), {
+        accounts: window.accounts,
+        payoutHistory: window.payoutHistory,
+        subscriptions: window.subscriptions
+    }).then(() => {
+        console.log("Data saved to Cloud");
+    }).catch((error) => {
+        console.error("Save failed:", error);
+    });
+};
+
+// FIREBASE FETCH
 const dataRef = ref(db, 'funded_fleet_v10/');
 onValue(dataRef, (snapshot) => {
     const data = snapshot.val();
@@ -46,22 +68,12 @@ onValue(dataRef, (snapshot) => {
         window.subscriptions = data.subscriptions || [];
         
         const status = document.getElementById('cloudStatus');
-        status.innerText = "☁️ Cloud Synced";
-        status.className = "text-emerald-500 text-[10px] font-bold uppercase italic mt-1";
+        if(status) {
+            status.innerText = "☁️ Cloud Synced";
+            status.className = "text-emerald-500 text-[10px] font-bold uppercase italic mt-1";
+        }
     }
-    renderAll();
-});
-
-window.saveAll = function() {
-    set(ref(db, 'funded_fleet_v10/'), {
-        accounts: window.accounts,
-        payoutHistory: window.payoutHistory,
-        subscriptions: window.subscriptions
-    });
-};
-
-function renderAll() {
     renderFleet();
     renderPayouts();
     renderSubs();
-}
+});
