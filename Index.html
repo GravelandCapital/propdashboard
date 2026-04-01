@@ -3,311 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Funded Fleet: Elite Dashboard</title>
+    <title>Funded Fleet | Elite</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        .progress-bar { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
-        ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #0f172a; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
-        
-        .stage-2 { border: 2px solid #a855f7 !important; box-shadow: 0 0 20px rgba(168, 85, 247, 0.2); }
-        .stage-2-bar { background: linear-gradient(90deg, #a855f7, #eab308); }
-        
-        @keyframes borderRotate { 100% { filter: hue-rotate(360deg); } }
-        .stage-3 { border: 2px solid #06b6d4 !important; box-shadow: 0 0 30px rgba(6, 182, 212, 0.3); animation: borderRotate 6s linear infinite; }
-        .stage-3-bar { background: linear-gradient(90deg, #06b6d4, #f43f5e, #fbbf24); background-size: 200% 200%; }
-        
-        .card-drawdown { border: 1px solid #ef444450 !important; box-shadow: 0 0 15px rgba(239, 68, 68, 0.1); }
-        .payout-glow { text-shadow: 0 0 15px rgba(52, 211, 153, 0.4); }
-    </style>
+    <link rel="stylesheet" href="style.css">
 </head>
-<body class="bg-slate-950 text-slate-200 min-h-screen p-4 md:p-10 font-sans tracking-tight">
+<body class="bg-slate-950 text-slate-200 min-h-screen font-sans tracking-tight">
 
-    <div class="max-w-7xl mx-auto">
-        <div class="flex justify-between items-center mb-12 bg-slate-900/40 p-6 rounded-[2rem] border border-slate-800/50">
-            <div>
-                <h1 class="text-3xl font-black text-white uppercase italic tracking-tighter">Funded Fleet</h1>
-                <p id="cloudStatus" class="text-amber-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic">☁️ Connecting...</p>
-            </div>
-            <div class="text-right">
-                <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Payouts</p>
-                <h2 id="payoutDisplay" class="text-4xl font-black text-emerald-400 payout-glow italic tracking-tighter">$0</h2>
-            </div>
+    <nav class="fixed left-0 top-0 h-screen w-64 bg-slate-900 border-r border-slate-800 p-6 z-40">
+        <div class="mb-12">
+            <h1 class="text-2xl font-black text-white uppercase italic tracking-tighter">Funded Fleet</h1>
+            <p id="cloudStatus" class="text-amber-500 text-[10px] font-bold uppercase italic mt-1">☁️ Connecting...</p>
         </div>
 
-        <button onclick="window.openModal('setupModal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition-all mb-8 shadow-lg active:scale-95">
-            + NEW ACCOUNT
-        </button>
+        <ul class="space-y-4">
+            <li>
+                <button onclick="showSection('fleet')" class="nav-btn active w-full text-left p-4 rounded-2xl font-bold transition flex items-center gap-3">
+                    <span>🛸</span> Funded Fleet
+                </button>
+            </li>
+            <li>
+                <button onclick="showSection('payouts')" class="nav-btn w-full text-left p-4 rounded-2xl font-bold transition flex items-center gap-3">
+                    <span>💰</span> Payouts
+                </button>
+            </li>
+            <li>
+                <button onclick="showSection('subscriptions')" class="nav-btn w-full text-left p-4 rounded-2xl font-bold transition flex items-center gap-3">
+                    <span>📅</span> Subscriptions
+                </button>
+            </li>
+        </ul>
 
-        <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"></div>
-
-        <div class="mt-20 border-t border-slate-800 pt-12">
-            <h2 class="text-2xl font-black text-white italic uppercase tracking-tighter mb-8">Payout Calendar</h2>
-            <div id="payoutCalendar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        <div class="absolute bottom-10 left-6 right-6">
+            <p class="text-[10px] font-bold text-slate-500 uppercase mb-1">Total Career Payouts</p>
+            <h2 id="payoutDisplay" class="text-3xl font-black text-emerald-400 payout-glow italic tracking-tighter">$0</h2>
         </div>
-    </div>
+    </nav>
 
-    <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
+    <main class="ml-64 p-10">
+        
+        <section id="fleet-section" class="content-section">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black text-white italic uppercase">Fleet Dashboard</h2>
+                <button onclick="window.openModal('setupModal')" class="bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 px-8 rounded-2xl transition-all shadow-lg active:scale-95">
+                    + DEPLOY ACCOUNT
+                </button>
+            </div>
+            <div id="grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-8"></div>
+        </section>
+
+        <section id="payouts-section" class="content-section hidden">
+            <h2 class="text-3xl font-black text-white italic uppercase mb-8">Income Calendar</h2>
+            <div id="payoutCalendar" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+        <section id="subscriptions-section" class="content-section hidden">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-3xl font-black text-white italic uppercase">Renewal Tracker</h2>
+                <button onclick="window.openModal('subModal')" class="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 px-8 rounded-2xl transition shadow-lg">
+                    + NEW SUBSCRIPTION
+                </button>
+            </div>
+            <div id="subGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+    </main>
+
+    <div id="setupModal" class="modal fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
             <h2 class="text-xl font-bold mb-6 text-white text-center">New Account</h2>
             <div class="space-y-4">
                 <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mTarget" placeholder="Profit Target $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    <input type="number" id="mTarget" placeholder="Target $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                     <input type="number" id="mCons" placeholder="Consistency %" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
-                    <input type="number" id="mMinDays" placeholder="Min Trading Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
-                    <input type="number" id="mMinProfit" placeholder="Min $ / Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    <input type="number" id="mMinDays" placeholder="Min Days" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    <input type="number" id="mMinProfit" placeholder="Min $/Day" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 </div>
                 <input type="number" id="mMinBalance" placeholder="Min Balance for Payout (Optional) $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
-                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 active:scale-95 transition">Deploy</button>
-                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-xs mt-2 font-bold uppercase">Cancel</button>
+                <button onclick="window.createAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4">Deploy</button>
+                <button onclick="window.closeModal('setupModal')" class="w-full text-slate-500 text-xs font-bold mt-2 uppercase">Cancel</button>
             </div>
         </div>
     </div>
 
-    <div id="detailsModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-50 backdrop-blur-md">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-2xl w-full max-h-[85vh] flex flex-col">
-            <div class="flex justify-between items-center mb-6">
-                <h2 id="detailsTitle" class="text-2xl font-black text-white italic tracking-tighter">Audit Log</h2>
-                <button onclick="window.closeModal('detailsModal')" class="text-slate-500 hover:text-white text-2xl">✕</button>
+    <div id="subModal" class="modal fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
+            <h2 class="text-xl font-bold mb-6 text-white text-center">Add Subscription</h2>
+            <div class="space-y-4">
+                <input type="text" id="subName" placeholder="Account / Firm Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Renewal Date</label>
+                <input type="date" id="subDate" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                <input type="number" id="subCost" placeholder="Cost $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                <button onclick="window.createSubscription()" class="w-full bg-indigo-600 p-4 rounded-xl font-bold text-white mt-4">Save Subscription</button>
+                <button onclick="window.closeModal('subModal')" class="w-full text-slate-500 text-xs font-bold mt-2 uppercase">Cancel</button>
             </div>
-            <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex gap-3 items-end">
-                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label><input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none"></div>
-                <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label><input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none text-sm"></div>
-                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px]">Add</button>
-            </div>
-            <div id="historyList" class="flex-1 overflow-y-auto space-y-3"></div>
         </div>
     </div>
 
-    <div id="payoutModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full text-center">
-            <div class="text-5xl mb-4">💰</div>
-            <h2 class="text-2xl font-bold mb-6 text-white italic">Claim Payout</h2>
-            <input type="number" id="payoutInput" placeholder="Withdrawal Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-2xl mb-4 outline-none">
-            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition">Confirm & Upgrade</button>
-        </div>
-    </div>
-
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
-            authDomain: "fundeddashboard.firebaseapp.com",
-            databaseURL: "https://fundeddashboard-default-rtdb.europe-west1.firebasedatabase.app",
-            projectId: "fundeddashboard",
-            storageBucket: "fundeddashboard.firebasestorage.app",
-            messagingSenderId: "1050670416192",
-            appId: "1:1050670416192:web:3ade461e3b6457dd4cfaa5",
-            measurementId: "G-9EWLLJ7WWY"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-
-        window.accounts = [];
-        window.payoutHistory = [];
-        window.activeId = null;
-
-        const dataRef = ref(db, 'funded_fleet_v10/');
-        onValue(dataRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                window.accounts = data.accounts || [];
-                window.payoutHistory = data.payoutHistory || [];
-                document.getElementById('cloudStatus').innerText = "☁️ Cloud Synced";
-                document.getElementById('cloudStatus').className = "text-emerald-500 text-[10px] font-bold uppercase tracking-widest mt-1 italic";
-            } else {
-                document.getElementById('cloudStatus').innerText = "☁️ Online (Ready)";
-            }
-            render();
-        });
-
-        window.save = function() {
-            set(ref(db, 'funded_fleet_v10/'), {
-                accounts: window.accounts,
-                payoutHistory: window.payoutHistory
-            });
-        };
-
-        window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
-
-        window.createAccount = function() {
-            const newAcc = {
-                id: Date.now(),
-                name: document.getElementById('mName').value || "Unnamed",
-                stage: 1,
-                target: parseFloat(document.getElementById('mTarget').value) || 0,
-                consistency: parseFloat(document.getElementById('mCons').value) || 0,
-                minDaysNeeded: parseInt(document.getElementById('mMinDays').value) || 0,
-                minProfitPerDay: parseFloat(document.getElementById('mMinProfit').value) || 0,
-                minBalance: parseFloat(document.getElementById('mMinBalance').value) || 0,
-                history: [], currentProfit: 0, daysTraded: 0, bestDay: 0
-            };
-            window.accounts.push(newAcc);
-            render(); window.save(); window.closeModal('setupModal');
-        };
-
-        window.logProfit = function(id) {
-            const amount = parseFloat(prompt("Enter profit/loss:"));
-            if (isNaN(amount)) return;
-            const acc = window.accounts.find(a => a.id === id);
-            if(!acc.history) acc.history = [];
-            acc.history.push({ id: Date.now(), amount, date: new Date().toISOString() });
-            recalculate(acc); render(); window.save();
-        };
-
-        window.addManualDay = function() {
-            const amount = parseFloat(document.getElementById('manualProfit').value);
-            const dateVal = document.getElementById('manualDate').value;
-            if (isNaN(amount) || !dateVal) return alert("Fill fields");
-            const acc = window.accounts.find(a => a.id === window.activeId);
-            if(!acc.history) acc.history = [];
-            acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
-            recalculate(acc); window.showDetails(window.activeId); render(); window.save();
-            document.getElementById('manualProfit').value = '';
-        };
-
-        function recalculate(acc) {
-            if(!acc.history) acc.history = [];
-            acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-            acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
-            const profitDays = acc.history.filter(h => h.amount > 0).map(h => h.amount);
-            acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
-            const uniqueDays = new Set();
-            acc.history.forEach(e => { if (e.amount >= acc.minProfitPerDay) uniqueDays.add(new Date(e.date).toDateString()); });
-            acc.daysTraded = uniqueDays.size;
-        }
-
-        window.showDetails = function(id) {
-            window.activeId = id;
-            const acc = window.accounts.find(a => a.id === id);
-            const list = document.getElementById('historyList');
-            document.getElementById('detailsTitle').innerText = `${acc.name} Audit`;
-            list.innerHTML = '';
-            [...(acc.history || [])].reverse().forEach(entry => {
-                const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
-                list.innerHTML += `<div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50"><div><p class="text-[10px] text-slate-500 font-bold uppercase">${date}</p><p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p></div><button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 text-xs px-3">✕</button></div>`;
-            });
-            window.openModal('detailsModal');
-        };
-
-        window.deleteEntry = function(accId, entryId) {
-            if (confirm("Delete?")) {
-                const acc = window.accounts.find(a => a.id === accId);
-                acc.history = acc.history.filter(e => e.id !== entryId);
-                recalculate(acc); window.showDetails(accId); render(); window.save();
-            }
-        };
-
-        window.triggerPayout = (id) => { window.activeId = id; window.openModal('payoutModal'); };
-
-        window.processPayout = function() {
-            const amount = parseFloat(document.getElementById('payoutInput').value) || 0;
-            const acc = window.accounts.find(a => a.id === window.activeId);
-            window.payoutHistory.push({ id: Date.now(), amount, date: new Date().toISOString(), accountName: acc.name });
-            acc.stage += 1; acc.history = []; recalculate(acc);
-            const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Target?`, acc.target));
-            if(!isNaN(nextTarget)) acc.target = nextTarget;
-            render(); window.save(); window.closeModal('payoutModal');
-            document.getElementById('payoutInput').value = '';
-        };
-
-        window.deleteAccount = function(id) { if(confirm("Delete Account?")) { window.accounts = window.accounts.filter(a => a.id !== id); render(); window.save(); } };
-
-        function render() {
-            const totalSum = window.payoutHistory.reduce((sum, p) => sum + p.amount, 0);
-            document.getElementById('payoutDisplay').innerText = `$${totalSum.toLocaleString()}`;
-
-            const container = document.getElementById('grid');
-            container.innerHTML = '';
-            window.accounts.forEach(acc => {
-                const isLoss = acc.currentProfit < 0;
-                const progress = acc.target > 0 ? Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100) : 0;
-                const curCons = acc.currentProfit > 0 ? (acc.bestDay / acc.currentProfit) * 100 : 0;
-                const violation = acc.consistency > 0 && curCons > acc.consistency;
-                
-                // CORRECTED OPTIONAL LOGIC:
-                // If the field is missing (old account) or 0, it's ignored (returns true).
-                const daysMet = !acc.minDaysNeeded || acc.daysTraded >= acc.minDaysNeeded;
-                const balanceMet = !acc.minBalance || acc.currentProfit >= acc.minBalance;
-                const consistencyMet = !acc.consistency || !violation;
-                
-                const canUpgrade = daysMet && balanceMet && consistencyMet;
-
-                let cardClass = isLoss ? "card-drawdown" : ""; 
-                let barClass = isLoss ? "bg-red-600 shadow-[0_0_15px_rgba(239,68,68,0.4)]" : "bg-blue-600";
-                if(!isLoss) {
-                    if(acc.stage === 2) { cardClass = "stage-2"; barClass = "stage-2-bar"; }
-                    if(acc.stage >= 3) { cardClass = "stage-3"; barClass = "stage-3-bar"; }
-                }
-
-                container.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] relative ${cardClass} transition-all duration-500">
-                        <div class="flex justify-between items-start mb-6">
-                            <div><span class="text-[9px] bg-slate-950 text-slate-400 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-slate-800">Stage ${acc.stage}</span><h3 class="text-2xl font-black text-white italic mt-2 tracking-tight">${acc.name}</h3></div>
-                            <button onclick="window.deleteAccount(${acc.id})" class="text-slate-800 hover:text-red-500">✕</button>
-                        </div>
-                        <div class="mb-8">
-                            <div class="flex justify-between items-end mb-2">
-                                <span class="text-5xl font-black ${isLoss ? 'text-red-500' : 'text-white'} italic">$${acc.currentProfit.toLocaleString()}</span>
-                                <div class="text-right text-[10px] font-mono font-bold text-slate-500 italic">Target: $${acc.target.toLocaleString()}</div>
-                            </div>
-                            <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800/50 shadow-inner">
-                                <div class="progress-bar ${barClass} h-full rounded-full" style="width: ${progress}%"></div>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-2 gap-3 mb-8">
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
-                                <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Best Day</p>
-                                <p class="text-sm font-mono ${violation ? 'text-red-500' : 'text-blue-400'} font-bold">$${acc.bestDay.toLocaleString()}</p>
-                            </div>
-                            <div class="bg-slate-950/50 p-4 rounded-2xl border border-slate-800/50">
-                                <p class="text-[9px] text-slate-500 font-bold uppercase mb-1">Trading Days</p>
-                                <p class="text-sm font-mono ${daysMet ? 'text-emerald-400' : 'text-slate-400'} font-bold tracking-wider">${acc.daysTraded} / ${acc.minDaysNeeded || 0}</p>
-                            </div>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="window.logProfit(${acc.id})" class="flex-[2] bg-white text-slate-950 py-4 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-blue-500 hover:text-white transition shadow-lg active:scale-95">Update</button>
-                            <button onclick="window.showDetails(${acc.id})" class="flex-1 bg-slate-800 py-4 rounded-2xl font-bold text-xs uppercase text-slate-400 hover:bg-slate-700 transition active:scale-95">Audit</button>
-                        </div>
-                        ${canUpgrade ? `<button onclick="window.triggerPayout(${acc.id})" class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white text-[10px] font-black px-6 py-2 rounded-full animate-bounce shadow-xl uppercase whitespace-nowrap">Payout Ready</button>` : ''}
-                    </div>`;
-            });
-
-            const cal = document.getElementById('payoutCalendar');
-            cal.innerHTML = '';
-            const groups = {};
-            window.payoutHistory.forEach(p => {
-                const date = new Date(p.date);
-                const key = date.toLocaleString('default', { month: 'long', year: 'numeric' });
-                if (!groups[key]) groups[key] = { total: 0, items: [] };
-                groups[key].total += p.amount;
-                groups[key].items.push(p);
-            });
-            Object.keys(groups).sort((a,b) => new Date(b) - new Date(a)).forEach(month => {
-                cal.innerHTML += `
-                    <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 text-slate-800/20 text-6xl font-black rotate-12 select-none">${month.split(' ')[0]}</div>
-                        <h4 class="text-slate-500 text-[10px] font-bold uppercase mb-1">${month}</h4>
-                        <p class="text-3xl font-black text-emerald-400 tracking-tighter italic mb-4">$${groups[month].total.toLocaleString()}</p>
-                        <div class="space-y-2 max-h-[120px] overflow-y-auto pr-2">
-                            ${groups[month].items.map(item => `
-                                <div class="flex justify-between items-center text-[10px] font-mono border-b border-slate-800/50 pb-2">
-                                    <span class="text-slate-400 font-bold">${item.accountName}</span>
-                                    <span class="text-emerald-500 font-bold">+$${item.amount.toLocaleString()}</span>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>`;
-            });
-        }
-    </script>
+    <script type="module" src="app.js"></script>
 </body>
 </html>
