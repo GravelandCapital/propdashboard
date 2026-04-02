@@ -6,6 +6,33 @@ import { renderFleet } from './dashboard.js';
 import { renderPayouts } from './payouts.js';
 import { renderSubs } from './subscriptions.js';
 
+// ... Firebase imports at the top stay the same ...
+
+// GLOBAL HELPERS - Attached to window so every file can see them
+window.openModal = (id) => {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.classList.remove('hidden');
+        console.log(`Opening Modal: ${id}`); // Debugging line
+    } else {
+        console.error(`Modal with ID "${id}" not found!`);
+    }
+};
+
+window.closeModal = (id) => {
+    const modal = document.getElementById(id);
+    if (modal) modal.classList.add('hidden');
+};
+
+window.showSection = (sectionId) => {
+    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
+    const section = document.getElementById(`${sectionId}-section`);
+    if(section) section.classList.remove('hidden');
+    
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    if (window.event) window.event.currentTarget.classList.add('active');
+};
+
 const firebaseConfig = {
     apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
     authDomain: "fundeddashboard.firebaseapp.com",

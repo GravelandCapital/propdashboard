@@ -1,3 +1,4 @@
+// --- RENDER FUNCTION ---
 export function renderFleet() {
     const container = document.getElementById('grid');
     if (!container) return;
@@ -22,7 +23,10 @@ export function renderFleet() {
         container.innerHTML += `
             <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] relative ${cardClass} transition-all duration-500">
                 <div class="flex justify-between items-start mb-6">
-                    <div><span class="text-[9px] bg-slate-950 text-slate-400 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-slate-800">Stage ${acc.stage}</span><h3 class="text-2xl font-black text-white italic mt-2 tracking-tight">${acc.name}</h3></div>
+                    <div>
+                        <span class="text-[9px] bg-slate-950 text-slate-400 px-3 py-1 rounded-full font-bold uppercase tracking-widest border border-slate-800">Stage ${acc.stage}</span>
+                        <h3 class="text-2xl font-black text-white italic mt-2 tracking-tight">${acc.name}</h3>
+                    </div>
                     <button onclick="window.deleteAccount(${acc.id})" class="text-slate-800 hover:text-red-500">✕</button>
                 </div>
                 <div class="mb-8">
@@ -53,7 +57,41 @@ export function renderFleet() {
     });
 }
 
-// --- ATTACHED FUNCTIONS ---
+// --- GLOBAL ATTACHMENTS (Ensures HTML can see these) ---
+
+window.showDetails = function(id) {
+    console.log("Audit requested for ID:", id);
+    window.activeId = id;
+    const acc = window.accounts.find(a => a.id === id);
+    
+    if (!acc) return console.error("Account not found for Audit!");
+
+    const list = document.getElementById('historyList');
+    const title = document.getElementById('detailsTitle');
+    
+    if(title) title.innerText = `${acc.name} Audit`;
+    if(list) {
+        list.innerHTML = '';
+        const history = acc.history || [];
+        [...history].reverse().forEach(entry => {
+            const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
+            list.innerHTML += `
+                <div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50">
+                    <div>
+                        <p class="text-[10px] text-slate-500 font-bold uppercase">${date}</p>
+                        <p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="window.editEntry(${acc.id}, ${entry.id})" class="text-xs bg-slate-700 px-3 py-1 rounded">Edit</button>
+                        <button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-xs text-red-500 bg-red-900/20 px-3 py-1 rounded">✕</button>
+                    </div>
+                </div>`;
+        });
+    }
+    
+    // Calls the global opener in app.js
+    window.openModal('detailsModal');
+};
 
 window.createAccount = function() {
     const newAcc = {
@@ -78,49 +116,13 @@ window.logProfit = function(id) {
     const acc = window.accounts.find(a => a.id === id);
     if(!acc.history) acc.history = [];
     acc.history.push({ id: Date.now(), amount, date: new Date().toISOString() });
-    recalculate(acc);
+    
+    // Quick local recalculate
+    acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
+    const profitDays = acc.history.filter(h => h.amount > 0).map(h => h.amount);
+    acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
+    
     window.saveAll();
-};
-
-window.showDetails = function(id) {
-    window.activeId = id;
-    const acc = window.accounts.find(a => a.id === id);
-    const list = document.getElementById('historyList');
-    document.getElementById('detailsTitle').innerText = `${acc.name} Audit`;
-    list.innerHTML = '';
-    const history = acc.history || [];
-    [...history].reverse().forEach(entry => {
-        const date = new Date(entry.date).toLocaleDateString([], {weekday:'short', month:'short', day:'numeric'});
-        list.innerHTML += `
-            <div class="bg-slate-800/60 p-4 rounded-xl flex justify-between items-center border border-slate-700/50">
-                <div><p class="text-[10px] text-slate-500 font-bold uppercase">${date}</p><p class="${entry.amount >= 0 ? 'text-emerald-400' : 'text-red-400'} font-bold font-mono">$${entry.amount.toLocaleString()}</p></div>
-                <button onclick="window.deleteEntry(${acc.id}, ${entry.id})" class="text-red-500 text-xs px-3">✕</button>
-            </div>`;
-    });
-    window.openModal('detailsModal');
-};
-
-window.addManualDay = function() {
-    const amount = parseFloat(document.getElementById('manualProfit').value);
-    const dateVal = document.getElementById('manualDate').value;
-    if (isNaN(amount) || !dateVal) return alert("Fill fields");
-    const acc = window.accounts.find(a => a.id === window.activeId);
-    if(!acc.history) acc.history = [];
-    acc.history.push({ id: Date.now(), amount, date: new Date(dateVal).toISOString() });
-    recalculate(acc);
-    window.showDetails(window.activeId);
-    window.saveAll();
-    document.getElementById('manualProfit').value = '';
-};
-
-window.deleteEntry = function(accId, entryId) {
-    if (confirm("Delete entry?")) {
-        const acc = window.accounts.find(a => a.id === accId);
-        acc.history = acc.history.filter(e => e.id !== entryId);
-        recalculate(acc);
-        window.showDetails(accId);
-        window.saveAll();
-    }
 };
 
 window.deleteAccount = function(id) {
@@ -130,13 +132,24 @@ window.deleteAccount = function(id) {
     }
 };
 
-function recalculate(acc) {
-    if(!acc.history) acc.history = [];
-    acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
-    acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
-    const profitDays = acc.history.filter(h => h.amount > 0).map(h => h.amount);
-    acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
-    const uniqueDays = new Set();
-    acc.history.forEach(e => { if (e.amount >= (acc.minProfitPerDay || 0)) uniqueDays.add(new Date(e.date).toDateString()); });
-    acc.daysTraded = uniqueDays.size;
-}
+window.editEntry = function(accId, entryId) {
+    const acc = window.accounts.find(a => a.id === accId);
+    const entry = acc.history.find(e => e.id === entryId);
+    const newVal = parseFloat(prompt("Edit amount:", entry.amount));
+    if (!isNaN(newVal)) { 
+        entry.amount = newVal; 
+        acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
+        window.showDetails(accId); 
+        window.saveAll(); 
+    }
+};
+
+window.deleteEntry = function(accId, entryId) {
+    if (confirm("Delete entry?")) {
+        const acc = window.accounts.find(a => a.id === accId);
+        acc.history = acc.history.filter(e => e.id !== entryId);
+        acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
+        window.showDetails(accId);
+        window.saveAll();
+    }
+};
