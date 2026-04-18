@@ -35,33 +35,47 @@ export function renderPayouts() {
 
 window.processPayout = function() {
     const amountInput = document.getElementById('payoutInput');
-    const amount = parseFloat(amountInput.value) || 0;
+    const balanceInput = document.getElementById('newBalanceInput');
     
-    // Find the account using the ID we saved in triggerPayout
+    const payoutAmount = parseFloat(amountInput.value) || 0;
+    const remainingBalance = parseFloat(balanceInput.value) || 0;
+    
     const acc = window.accounts.find(a => a.id === window.activeId);
-    
-    if (!acc) return alert("Error: Account not found. Try clicking Payout Ready again.");
+    if (!acc) return alert("Account not found.");
 
-    // 1. Log to History
+    // 1. Record the payout in your global Payout History (Calendar)
     window.payoutHistory.push({
         id: Date.now(),
-        amount: amount,
+        amount: payoutAmount,
         date: new Date().toISOString(),
         accountName: acc.name
     });
 
-    // 2. Upgrade the account
+    // 2. Upgrade the Stage
     acc.stage += 1;
-    acc.history = []; // Clear history for the new stage
+
+    // 3. WIPE History & Reset Trading Days
+    // We clear the history so the "Days Traded" starts at 0 for the new stage.
+    acc.history = []; 
     
-    // 3. Prompt for new target if needed
-    const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! Set new Profit Target for this stage:`, acc.target));
+    // 4. Start the new stage with the remaining balance
+    // We add this as a special entry so the audit log shows where the money started.
+    acc.history.push({
+        id: Date.now(),
+        amount: remainingBalance,
+        date: new Date().toISOString(),
+        isAdjustment: true // We flag this so it doesn't count as a "Trading Day"
+    });
+
+    // 5. Prompt for new Target
+    const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! New Profit Target?`, acc.target));
     if(!isNaN(nextTarget)) acc.target = nextTarget;
-    
-    // 4. Save and Clean up
+
+    // 6. Save and Refresh
     window.saveAll();
     window.closeModal('payoutModal');
-    amountInput.value = '';
     
-    console.log(`Success: Account ${acc.name} upgraded to Stage ${acc.stage}`);
+    // Clear inputs for next time
+    amountInput.value = '';
+    balanceInput.value = '';
 };

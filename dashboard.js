@@ -4,6 +4,14 @@ export function renderFleet() {
     if (!container) return;
     container.innerHTML = '';
 
+    <div class="flex justify-between items-end mb-2">
+    <div class="flex items-center gap-2">
+        <span class="text-5xl font-black ${isLoss ? 'text-red-500' : 'text-white'} italic">$${acc.currentProfit.toLocaleString()}</span>
+        <button onclick="window.editBalance(${acc.id})" class="text-slate-700 hover:text-blue-400 transition text-sm">✎</button>
+    </div>
+    <div class="text-right text-[10px] font-mono font-bold text-slate-500 italic">Target: $${acc.target.toLocaleString()}</div>
+</div>
+
     window.accounts.forEach(acc => {
         const isLoss = acc.currentProfit < 0;
         const progress = acc.target > 0 ? Math.min((Math.abs(acc.currentProfit) / acc.target) * 100, 100) : 0;
@@ -195,3 +203,49 @@ window.triggerPayout = function(id) {
     window.activeId = id; // Store the ID so the payout knows where to go
     window.openModal('payoutModal');
 };
+
+// Function to edit balance anytime
+window.editBalance = function(id) {
+    const acc = window.accounts.find(a => a.id === id);
+    const newTotal = parseFloat(prompt(`Current Balance: $${acc.currentProfit.toLocaleString()}\nEnter NEW Total Balance:`, acc.currentProfit));
+    
+    if (isNaN(newTotal)) return;
+
+    // Calculate the adjustment needed
+    const adjustment = newTotal - acc.currentProfit;
+
+    if (!acc.history) acc.history = [];
+    
+    acc.history.push({
+        id: Date.now(),
+        amount: adjustment,
+        date: new Date().toISOString(),
+        isAdjustment: true // Mark as adjustment so it doesn't count as a trading day
+    });
+
+    recalculate(acc);
+    window.saveAll();
+};
+
+// Update the recalculate function to IGNORE adjustments when counting trading days
+function recalculate(acc) {
+    if(!acc.history) acc.history = [];
+    acc.history.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    acc.currentProfit = acc.history.reduce((sum, e) => sum + e.amount, 0);
+    
+    const dayTotals = {};
+    acc.history.forEach(entry => {
+        // Only count entries that are NOT adjustments for trading days
+        if (!entry.isAdjustment) {
+            const dateStr = new Date(entry.date).toDateString();
+            dayTotals[dateStr] = (dayTotals[dateStr] || 0) + entry.amount;
+        }
+    });
+
+    const dayValues = Object.values(dayTotals);
+    acc.daysTraded = dayValues.filter(v => v >= (acc.minProfitPerDay || 0)).length;
+
+    const profitDays = dayValues.filter(v => v > 0);
+    acc.bestDay = profitDays.length > 0 ? Math.max(...profitDays) : 0;
+}
