@@ -50,7 +50,7 @@
 
     <div id="setupModal" class="fixed inset-0 bg-black/90 hidden flex items-center justify-center p-4 z-50">
         <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
-            <h2 class="text-xl font-bold mb-6 text-white text-center italic">New Deployment</h2>
+            <h2 class="text-xl font-bold mb-6 text-white text-center italic uppercase">New Deployment</h2>
             <div class="space-y-4">
                 <input type="text" id="mName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <div class="grid grid-cols-2 gap-4">
@@ -68,6 +68,40 @@
         </div>
     </div>
 
+    <div id="editAccountModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-[60] backdrop-blur-md">
+        <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-md w-full">
+            <h2 class="text-2xl font-black text-white italic uppercase mb-6">Edit Account Settings</h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Account Name</label>
+                    <input type="text" id="editName" class="bg-slate-800 p-3 rounded-xl w-full text-white border border-slate-700 outline-none">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Stage</label>
+                        <input type="number" id="editStage" class="bg-slate-800 p-3 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Target $</label>
+                        <input type="number" id="editTarget" class="bg-slate-800 p-3 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Manual Day Offset</label>
+                        <input type="number" id="editDayOffset" placeholder="Add extra days" class="bg-slate-800 p-3 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Consistency %</label>
+                        <input type="number" id="editCons" class="bg-slate-800 p-3 rounded-xl w-full text-white border border-slate-700 outline-none">
+                    </div>
+                </div>
+                <button onclick="window.updateAccount()" class="w-full bg-blue-600 p-4 rounded-xl font-bold text-white mt-4 shadow-xl">Save All Changes</button>
+                <button onclick="window.closeModal('editAccountModal')" class="w-full text-slate-500 text-xs font-bold mt-2 uppercase">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <div id="detailsModal" class="fixed inset-0 bg-black/95 hidden flex items-center justify-center p-4 z-50 backdrop-blur-md">
         <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-2xl w-full max-h-[85vh] flex flex-col">
             <div class="flex justify-between items-center mb-6">
@@ -77,7 +111,7 @@
             <div class="bg-slate-950 p-4 rounded-2xl mb-6 border border-slate-800 flex gap-3 items-end">
                 <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Profit</label><input type="number" id="manualProfit" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none"></div>
                 <div class="flex-1"><label class="text-[9px] font-bold text-slate-500 block ml-1 uppercase">Date</label><input type="date" id="manualDate" class="w-full bg-slate-800 p-2 rounded-lg text-white border border-slate-700 outline-none text-sm"></div>
-                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px] active:scale-95 transition">Add</button>
+                <button onclick="window.addManualDay()" class="bg-emerald-600 px-6 py-2 rounded-lg text-sm font-bold h-[42px]">Add</button>
             </div>
             <div id="historyList" class="flex-1 overflow-y-auto space-y-3"></div>
         </div>
@@ -87,14 +121,11 @@
         <div class="bg-slate-900 border border-slate-800 p-8 rounded-[2.5rem] max-w-sm w-full text-center">
             <div class="text-5xl mb-4">💰</div>
             <h2 class="text-2xl font-bold mb-6 text-white italic uppercase">Claim Payout</h2>
-            
             <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2 text-left ml-2">Withdrawal Amount</label>
             <input type="number" id="payoutInput" placeholder="Amount $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-xl mb-4 outline-none">
-            
             <label class="text-[10px] font-bold text-slate-500 uppercase block mb-2 text-left ml-2">Remaining Account Balance</label>
             <input type="number" id="newBalanceInput" placeholder="Starting Balance $" class="bg-slate-800 p-4 rounded-xl border border-slate-700 w-full text-white text-center text-xl mb-6 outline-none">
-            
-            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition">Confirm & Stage Up</button>
+            <button onclick="window.processPayout()" class="w-full bg-emerald-600 p-4 rounded-xl font-bold text-white shadow-lg active:scale-95 transition">Confirm & Upgrade</button>
             <button onclick="window.closeModal('payoutModal')" class="w-full text-slate-500 text-xs font-bold mt-4 uppercase">Cancel</button>
         </div>
     </div>
@@ -103,11 +134,11 @@
         <div class="bg-slate-900 p-8 rounded-[2rem] max-w-md w-full border border-slate-800">
             <h2 class="text-xl font-bold mb-6 text-white text-center italic uppercase">Add Subscription</h2>
             <div class="space-y-4">
-                <input type="text" id="subName" placeholder="Account / Firm Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
+                <input type="text" id="subName" placeholder="Account Name" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <label class="text-[10px] font-bold text-slate-500 uppercase ml-2">Renewal Date</label>
                 <input type="date" id="subDate" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
                 <input type="number" id="subCost" placeholder="Cost $" class="bg-slate-800 p-4 rounded-xl w-full text-white border border-slate-700 outline-none">
-                <button onclick="window.createSubscription()" class="w-full bg-indigo-600 p-4 rounded-xl font-bold text-white mt-4 active:scale-95 transition">Save</button>
+                <button onclick="window.createSubscription()" class="w-full bg-indigo-600 p-4 rounded-xl font-bold text-white mt-4">Save</button>
                 <button onclick="window.closeModal('subModal')" class="w-full text-slate-500 text-xs font-bold mt-2 uppercase">Cancel</button>
             </div>
         </div>
