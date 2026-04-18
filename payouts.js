@@ -10,8 +10,25 @@ export function renderPayouts() {
         groups[key].total += p.amount;
         groups[key].items.push(p);
     });
+    
     Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
-        container.innerHTML += `<div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] relative overflow-hidden"><div class="absolute -right-4 -top-4 text-slate-800/20 text-6xl font-black rotate-12 select-none">${month.split(' ')[0]}</div><h4 class="text-slate-500 text-[10px] font-bold uppercase mb-1">${month}</h4><p class="text-3xl font-black text-emerald-400 italic mb-4">$${groups[month].total.toLocaleString()}</p><div class="space-y-2 max-h-[120px] overflow-y-auto pr-2">${groups[month].items.map(item => `<div class="flex justify-between items-center text-[10px] font-mono border-b border-slate-800/50 pb-2"><span class="text-slate-400 font-bold">${item.accountName}</span><span class="text-emerald-500 font-bold">+$${item.amount.toLocaleString()}</span></div>`).join('')}</div></div>`;
+        container.innerHTML += `
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] relative overflow-hidden">
+                <div class="absolute -right-4 -top-4 text-slate-800/20 text-6xl font-black rotate-12 select-none">${month.split(' ')[0]}</div>
+                <h4 class="text-slate-500 text-[10px] font-bold uppercase mb-1">${month}</h4>
+                <p class="text-3xl font-black text-emerald-400 italic mb-4">$${groups[month].total.toLocaleString()}</p>
+                <div class="space-y-2 max-h-[120px] overflow-y-auto pr-2">
+                    ${groups[month].items.map(item => `
+                        <div class="flex justify-between items-center text-[10px] font-mono border-b border-slate-800/50 pb-2">
+                            <span class="text-slate-400 font-bold">${item.accountName}</span>
+                            <div class="flex items-center gap-2">
+                                <span class="text-emerald-500 font-bold">+$${item.amount.toLocaleString()}</span>
+                                <button onclick="window.deletePayout(${item.id})" class="text-slate-700 hover:text-red-500 transition">✕</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>`;
     });
 }
 
@@ -40,4 +57,11 @@ window.processPayout = function() {
     window.closeModal('payoutModal');
     amountInput.value = '';
     balanceInput.value = '';
+};
+
+window.deletePayout = function(id) {
+    if(confirm("Delete this payout record? (This will not change your account stage)")) {
+        window.payoutHistory = window.payoutHistory.filter(p => p.id !== id);
+        window.saveAll();
+    }
 };
