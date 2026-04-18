@@ -1,37 +1,9 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-// Import renderers
 import { renderFleet } from './dashboard.js';
 import { renderPayouts } from './payouts.js';
 import { renderSubs } from './subscriptions.js';
-
-// ... Firebase imports at the top stay the same ...
-
-// GLOBAL HELPERS - Attached to window so every file can see them
-window.openModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) {
-        modal.classList.remove('hidden');
-        console.log(`Opening Modal: ${id}`); // Debugging line
-    } else {
-        console.error(`Modal with ID "${id}" not found!`);
-    }
-};
-
-window.closeModal = (id) => {
-    const modal = document.getElementById(id);
-    if (modal) modal.classList.add('hidden');
-};
-
-window.showSection = (sectionId) => {
-    document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-    const section = document.getElementById(`${sectionId}-section`);
-    if(section) section.classList.remove('hidden');
-    
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    if (window.event) window.event.currentTarget.classList.add('active');
-};
 
 const firebaseConfig = {
     apiKey: "AIzaSyAJcjATHW8cFWkWLEIBhf_7ViWPgXoWX3M",
@@ -46,46 +18,29 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 
-// Initialize Global Data
 window.accounts = [];
 window.payoutHistory = [];
 window.subscriptions = [];
 window.activeId = null;
 
-// GLOBAL HELPERS
-window.openModal = (id) => {
-    const modal = document.getElementById(id);
-    if(modal) modal.classList.remove('hidden');
-};
-
-window.closeModal = (id) => {
-    const modal = document.getElementById(id);
-    if(modal) modal.classList.add('hidden');
-};
+window.openModal = (id) => document.getElementById(id).classList.remove('hidden');
+window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
 
 window.showSection = (sectionId) => {
     document.querySelectorAll('.content-section').forEach(s => s.classList.add('hidden'));
-    const section = document.getElementById(`${sectionId}-section`);
-    if(section) section.classList.remove('hidden');
-    
+    document.getElementById(`${sectionId}-section`).classList.remove('hidden');
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
     if (window.event) window.event.currentTarget.classList.add('active');
 };
 
-// FIREBASE PUSH
 window.saveAll = function() {
     set(ref(db, 'funded_fleet_v10/'), {
         accounts: window.accounts,
         payoutHistory: window.payoutHistory,
         subscriptions: window.subscriptions
-    }).then(() => {
-        console.log("Data saved to Cloud");
-    }).catch((error) => {
-        console.error("Save failed:", error);
     });
 };
 
-// FIREBASE FETCH
 const dataRef = ref(db, 'funded_fleet_v10/');
 onValue(dataRef, (snapshot) => {
     const data = snapshot.val();
@@ -93,12 +48,8 @@ onValue(dataRef, (snapshot) => {
         window.accounts = data.accounts || [];
         window.payoutHistory = data.payoutHistory || [];
         window.subscriptions = data.subscriptions || [];
-        
-        const status = document.getElementById('cloudStatus');
-        if(status) {
-            status.innerText = "☁️ Cloud Synced";
-            status.className = "text-emerald-500 text-[10px] font-bold uppercase italic mt-1";
-        }
+        document.getElementById('cloudStatus').innerText = "☁️ Cloud Synced";
+        document.getElementById('cloudStatus').className = "text-emerald-500 text-[10px] font-bold uppercase italic mt-1";
     }
     renderFleet();
     renderPayouts();
