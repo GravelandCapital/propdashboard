@@ -1,3 +1,5 @@
+// --- PAYOUTS.JS ---
+
 export function renderPayouts() {
     const container = document.getElementById('payoutCalendar');
     if (!container) return;
@@ -12,6 +14,7 @@ export function renderPayouts() {
         groups[key].items.push(p);
     });
 
+    // Sort months descending
     Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)).forEach(month => {
         container.innerHTML += `
             <div class="bg-slate-900 border border-slate-800 p-6 rounded-[2rem] relative overflow-hidden">
@@ -31,9 +34,15 @@ export function renderPayouts() {
 }
 
 window.processPayout = function() {
-    const amount = parseFloat(document.getElementById('payoutInput').value) || 0;
+    const amountInput = document.getElementById('payoutInput');
+    const amount = parseFloat(amountInput.value) || 0;
+    
+    // Find the account using the ID we saved in triggerPayout
     const acc = window.accounts.find(a => a.id === window.activeId);
     
+    if (!acc) return alert("Error: Account not found. Try clicking Payout Ready again.");
+
+    // 1. Log to History
     window.payoutHistory.push({
         id: Date.now(),
         amount: amount,
@@ -41,9 +50,18 @@ window.processPayout = function() {
         accountName: acc.name
     });
 
+    // 2. Upgrade the account
     acc.stage += 1;
-    acc.history = []; // Reset for new stage
+    acc.history = []; // Clear history for the new stage
     
+    // 3. Prompt for new target if needed
+    const nextTarget = parseFloat(prompt(`Upgrade to Stage ${acc.stage}! Set new Profit Target for this stage:`, acc.target));
+    if(!isNaN(nextTarget)) acc.target = nextTarget;
+    
+    // 4. Save and Clean up
     window.saveAll();
     window.closeModal('payoutModal');
+    amountInput.value = '';
+    
+    console.log(`Success: Account ${acc.name} upgraded to Stage ${acc.stage}`);
 };

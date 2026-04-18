@@ -189,3 +189,9 @@ function recalculate(acc) {
     });
     acc.daysTraded = uniqueDays.size;
 }
+
+window.triggerPayout = function(id) {
+    console.log("Payout triggered for account:", id);
+    window.activeId = id; // Store the ID so the payout knows where to go
+    window.openModal('payoutModal');
+};
